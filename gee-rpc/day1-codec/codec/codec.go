@@ -11,7 +11,7 @@ import (
 
 // 客户端发送的请求包括服务名 Arith，方法名 Multiply，参数 args 三个，服务端的响应包括错误 error，返回值 reply 2 个。
 //  我们将请求和响应中的参数和返回值抽象为 body，
-// TODO 剩余的信息放在 header 中，那么就可以抽象出数据结构 Header：
+// TODO 剩余的信息放在 header 中
 type Header struct {
 	ServiceMethod string // format "Service.Method"
 	Seq           uint64 // sequence number chosen by client
@@ -32,7 +32,7 @@ type Codec interface {
 
 type NewCodecFunc func(io.ReadWriteCloser) Codec
 
-type Type string
+type Type string // TODO 为什么不直接用string
 
 const (
 	GobType  Type = "application/gob"
