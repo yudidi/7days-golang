@@ -18,6 +18,7 @@ func startServer(addr chan string) {
 	}
 	log.Println("start rpc server on", l.Addr())
 	addr <- l.Addr().String()
+	// 模拟服务端处理
 	geerpc.Accept(l)
 }
 
@@ -34,16 +35,19 @@ func main() {
 	// send options
 	_ = json.NewEncoder(conn).Encode(geerpc.DefaultOption)
 	cc := codec.NewGobCodec(conn)
+	// 模拟客户端
 	// send request & receive response
 	for i := 0; i < 5; i++ {
 		h := &codec.Header{
 			ServiceMethod: "Foo.Sum",
 			Seq:           uint64(i),
 		}
+		// 模拟客户端端发送数据
 		_ = cc.Write(h, fmt.Sprintf("geerpc req %d", h.Seq))
+		// 模拟客户端接收数据 // 读取响应头
 		_ = cc.ReadHeader(h)
 		var reply string
 		_ = cc.ReadBody(&reply)
-		log.Println("reply:", reply)
+		log.Println("响应：", "h:", h, "reply:", reply)
 	}
 }

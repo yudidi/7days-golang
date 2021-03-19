@@ -40,15 +40,17 @@ func (c *GobCodec) ReadBody(body interface{}) error {
 
 func (c *GobCodec) Write(h *Header, body interface{}) (err error) {
 	defer func() {
+		// TODO 这个时候才从缓存区写入到底层Write(conn中)
 		_ = c.buf.Flush()
 		if err != nil {
 			_ = c.Close()
 		}
 	}()
-	if err = c.enc.Encode(h); err != nil {
+	if err = c.enc.Encode(h); err != nil { //
 		log.Println("rpc: gob error encoding header:", err)
 		return
 	}
+	//c.buf.WriteString("11")
 	if err = c.enc.Encode(body); err != nil {
 		log.Println("rpc: gob error encoding body:", err)
 		return

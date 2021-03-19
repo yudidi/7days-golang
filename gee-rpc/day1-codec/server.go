@@ -42,8 +42,10 @@ var DefaultServer = NewServer()
 // ServeConn blocks, serving the connection until the client hangs up.
 func (server *Server) ServeConn(conn io.ReadWriteCloser) {
 	defer func() { _ = conn.Close() }()
+	// TODO Q: 并且客户端与服务端实现了简单的协议交换(protocol exchange)，即允许客户端使用不同的编码方式
+	// 读取并且解析请求头
 	var opt Option
-	if err := json.NewDecoder(conn).Decode(&opt); err != nil {
+	if err := json.NewDecoder(conn).Decode(&opt); err != nil { // TODO 这句话干了什么? 先读取option字段吗
 		log.Println("rpc server: options error: ", err)
 		return
 	}
@@ -51,17 +53,20 @@ func (server *Server) ServeConn(conn io.ReadWriteCloser) {
 		log.Printf("rpc server: invalid magic number %x", opt.MagicNumber)
 		return
 	}
-	f := codec.NewCodecFuncMap[opt.CodecType]
+	// 根据请求头获取客户端的编码方式,进而使用对应的编码解码器
+	f := codec.NewCodecFuncMap[opt.CodecType] // f:编码解码器的构造函数.
 	if f == nil {
 		log.Printf("rpc server: invalid codec type %s", opt.CodecType)
 		return
 	}
-	server.serveCodec(f(conn))
+	对应的编码解码器 := f(conn)
+	server.serveCodec(对应的编码解码器)
 }
 
 // invalidRequest is a placeholder for response argv when error occurs
 var invalidRequest = struct{}{}
 
+// cc 编码解码器实例
 func (server *Server) serveCodec(cc codec.Codec) {
 	sending := new(sync.Mutex) // make sure to send a complete response
 	wg := new(sync.WaitGroup)  // wait until all request are handled
@@ -99,6 +104,7 @@ func (server *Server) readRequestHeader(cc codec.Codec) (*codec.Header, error) {
 	return &h, nil
 }
 
+// 使用cc编码解码器,读取客户端请求头
 func (server *Server) readRequest(cc codec.Codec) (*request, error) {
 	h, err := server.readRequestHeader(cc)
 	if err != nil {
@@ -114,6 +120,7 @@ func (server *Server) readRequest(cc codec.Codec) (*request, error) {
 	return req, nil
 }
 
+// 返回响应消息体: 也是header+body
 func (server *Server) sendResponse(cc codec.Codec, h *codec.Header, body interface{}, sending *sync.Mutex) {
 	sending.Lock()
 	defer sending.Unlock()
@@ -122,11 +129,14 @@ func (server *Server) sendResponse(cc codec.Codec, h *codec.Header, body interfa
 	}
 }
 
+// 处理客户端请求
+// cc: 使用的编码解码器(使用特定的序列化协议)
 func (server *Server) handleRequest(cc codec.Codec, req *request, sending *sync.Mutex, wg *sync.WaitGroup) {
 	// TODO, should call registered rpc methods to get the right replyv
 	// day 1, just print argv and send a hello message
 	defer wg.Done()
-	log.Println(req.h, req.argv.Elem())
+	log.Println("in server: 打印获取到的请求头 和 请求参数", req.h, "# ", req.argv.Elem())
+	req.h.Error = "把客服端请求头原样返回给客户端"
 	req.replyv = reflect.ValueOf(fmt.Sprintf("geerpc resp %d", req.h.Seq))
 	server.sendResponse(cc, req.h, req.replyv.Interface(), sending)
 }

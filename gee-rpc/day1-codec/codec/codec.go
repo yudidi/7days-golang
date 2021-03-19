@@ -10,23 +10,29 @@ import (
 // reply 和 args 抽象为body
 
 // 客户端发送的请求包括服务名 Arith，方法名 Multiply，参数 args 三个，服务端的响应包括错误 error，返回值 reply 2 个。
-//  我们将请求和响应中的参数和返回值抽象为 body，
-// TODO 剩余的信息放在 header 中
+//  我们将请求和响应中的参数和返回值抽象为 body，剩余的信息放在header中
+// TODO  请求和响应消息,共用的headr
 type Header struct {
 	ServiceMethod string // format "Service.Method"
 	Seq           uint64 // sequence number chosen by client
-	Error         string
+	// 错误信息，客户端置为空，服务端如果如果发生错误，将错误信息置于 Error 中。
+	Error string
 }
 
+//  TODO 客户端和服务端公用的一套编码解码协议
+//  写入: 消息体和消息头
+//  读取: 消息头
+//  读取: 消息体
 // 抽象出对消息体进行编解码的接口 Codec，抽象出接口是为了实现不同的 Codec 实例：
 type Codec interface {
 	// 接口嵌入. Codec定义Closer的接口方法 // TODO Q:为什么需要定义Closer方法? http://c.biancheng.net/view/82.html
 	io.Closer
-	// 读取客户端请求的header
+	// 读取客户端或服务端 消息体的header
 	ReadHeader(*Header) error
-	//读取客户端请求的args 或 服务端响应的reply, 统称body
+	// 读取客户端请求的args 或 服务端响应的reply, 统称body
 	ReadBody(interface{}) error
 	// 往header写入内容
+	// 把header和body写入网络连接
 	Write(*Header, interface{}) error
 }
 
