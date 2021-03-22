@@ -45,6 +45,10 @@ func (server *Server) ServeConn(conn io.ReadWriteCloser) {
 	// TODO Q: 并且客户端与服务端实现了简单的协议交换(protocol exchange)，即允许客户端使用不同的编码方式
 	// 读取并且解析请求头
 	var opt Option
+	// 经过encode过后的json字符串是不会出现\n的，所以是可以作为分隔符的
+	// 分隔符为 换行符\n [10] // \n json序列化为=> [92,100]
+	// | Option{MagicNumber: xxx, CodecType: xxx} | Header{ServiceMethod ...} | Body interface{} |
+	//| <------      固定 JSON 编码      ------>  10 <-------   编码方式由 CodeType 决定   ------->|
 	if err := json.NewDecoder(conn).Decode(&opt); err != nil { // TODO 这句话干了什么? 先读取option字段吗
 		log.Println("rpc server: options error: ", err)
 		return
