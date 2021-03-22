@@ -7,7 +7,6 @@ import (
 	"geerpc/codec"
 	"log"
 	"net"
-	"time"
 )
 
 func startServer(addr chan string) {
@@ -30,10 +29,14 @@ func main() {
 	// in fact, following code is like a simple geerpc client
 	conn, _ := net.Dial("tcp", <-addr)
 	defer func() { _ = conn.Close() }()
-
-	time.Sleep(time.Second)
+	//time.Sleep(time.Second)
 	// send options
-	_ = json.NewEncoder(conn).Encode(geerpc.DefaultOption)
+	_ = json.NewEncoder(conn).Encode(geerpc.DefaultOption) // TODO 这句话往conn里面写入了啥东西
+	buf := make([]byte, 1024)
+	fmt.Printf("conn %+v \n", conn)
+	n, err := conn.Read(buf)
+	fmt.Println("read result", n, err)
+	fmt.Println("写入了 ", string(buf))
 	cc := codec.NewGobCodec(conn)
 	// 模拟客户端
 	// send request & receive response
