@@ -26,6 +26,8 @@ var DefaultOption = &Option{
 	CodecType:   GobType,
 }
 
+// 目的: 验证option和header的分隔符
+// 结论: [10]换行符分隔,json.Decode一直读取到[10]的位置。
 func main() {
 	//编码(&Option{
 	//	MagicNumber: MagicNumber,
