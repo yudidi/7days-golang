@@ -45,7 +45,7 @@ func (server *Server) ServeConn(conn io.ReadWriteCloser) {
 	// TODO Q: 并且客户端与服务端实现了简单的协议交换(protocol exchange)，即允许客户端使用不同的编码方式
 	// 读取并且解析请求头
 	var opt Option
-	// 经过encode过后的json字符串是不会出现\n的，所以是可以作为分隔符的
+	// 1.经过encode过后的json字符串是不会出现\n的，所以是可以作为分隔符的
 	// 分隔符为 换行符\n [10] // \n json序列化为=> [92,100]
 	// | Option{MagicNumber: xxx, CodecType: xxx} | Header{ServiceMethod ...} | Body interface{} |
 	//| <------      固定 JSON 编码      ------>  10 <-------   编码方式由 CodeType 决定   ------->|
@@ -63,6 +63,7 @@ func (server *Server) ServeConn(conn io.ReadWriteCloser) {
 		log.Printf("rpc server: invalid codec type %s", opt.CodecType)
 		return
 	}
+	// TODO 服务端选择了消息解码器之后会阻塞等待客户端发送具体的消息内容
 	对应的编码解码器 := f(conn)
 	server.serveCodec(对应的编码解码器)
 }
@@ -75,6 +76,7 @@ func (server *Server) serveCodec(cc codec.Codec) {
 	sending := new(sync.Mutex) // make sure to send a complete response
 	wg := new(sync.WaitGroup)  // wait until all request are handled
 	for {
+		// TODO 客户端不发送消息,服务端则阻塞在这里
 		req, err := server.readRequest(cc)
 		if err != nil {
 			if req == nil {
@@ -108,7 +110,7 @@ func (server *Server) readRequestHeader(cc codec.Codec) (*codec.Header, error) {
 	return &h, nil
 }
 
-// 使用cc编码解码器,读取客户端请求头
+// 使用cc编码解码器,读取客户端请求体(header&body)
 func (server *Server) readRequest(cc codec.Codec) (*request, error) {
 	h, err := server.readRequestHeader(cc)
 	if err != nil {

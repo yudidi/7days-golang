@@ -32,7 +32,7 @@ func main() {
 
 	time.Sleep(time.Second)
 	// send options
-	_ = json.NewEncoder(conn).Encode(geerpc.DefaultOption) // TODO 这1行干了啥? 编码期,需要存储模块,把编码结果写入到conn中.
+	_ = json.NewEncoder(conn).Encode(geerpc.DefaultOption)
 	cc := codec.NewGobCodec(conn)
 	// send request & receive response
 	for i := 0; i < 5; i++ {
@@ -40,8 +40,13 @@ func main() {
 			ServiceMethod: "Foo.Sum",
 			Seq:           uint64(i),
 		}
-		// TODO 客户端发送请求:header+body
-		_ = cc.Write(h, fmt.Sprintf("geerpc req %d", h.Seq))
+		// 客户端发送请求:header+body
+		_ = cc.Write(h, fmt.Sprintf("geerpc req %d 一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body"+
+			"一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body"+
+			"一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body"+
+			"一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body"+
+			"一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body"+
+			"一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body一个较大的body1", h.Seq))
 		// 然后读取服务端响应: header + body
 		_ = cc.ReadHeader(h)
 		var reply string

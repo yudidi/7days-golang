@@ -12,7 +12,7 @@ import (
 // buf 是为了防止阻塞而创建的带缓冲的 Writer，一般这么做能提升性能。
 type GobCodec struct {
 	conn io.ReadWriteCloser
-	buf  *bufio.Writer // TODO 客户端和服务端调用Write方法时，都是先写到buf(默认4096),然后再统一发送给对端。
+	buf  *bufio.Writer
 	dec  *gob.Decoder
 	enc  *gob.Encoder
 }
@@ -21,7 +21,7 @@ var _ Codec = (*GobCodec)(nil)
 
 // 传入1个套接字连接
 func NewGobCodec(conn io.ReadWriteCloser) Codec {
-	buf := bufio.NewWriter(conn) // 默认:4096
+	buf := bufio.NewWriter(conn) // conn具备从网卡写入到内存的能力.
 	return &GobCodec{
 		conn: conn,
 		buf:  buf,
@@ -40,7 +40,7 @@ func (c *GobCodec) ReadBody(body interface{}) error {
 
 func (c *GobCodec) Write(h *Header, body interface{}) (err error) {
 	defer func() {
-		// TODO 这个时候才从缓存区写入到底层Write(conn中). header和body一起发送下去
+		// TODO 这个时候才从缓存区写入到底层Write(conn中)
 		_ = c.buf.Flush()
 		if err != nil {
 			_ = c.Close()
