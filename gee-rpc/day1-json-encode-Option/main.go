@@ -31,7 +31,7 @@ var DefaultOption = &Option{
 func main() {
 	//编码(&Option{
 	//	MagicNumber: MagicNumber,
-	//	CodecType:   "/n",
+	//	CodecType:   "\n",
 	//})
 	buf1 := 编码(&Option{
 		MagicNumber: MagicNumber,
@@ -43,12 +43,13 @@ func main() {
 		CodecType:   JsonType,
 	})
 	解码(buf2)
+
 	解码(&bytes.Buffer{})
 }
 
 func 编码(o *Option) *bytes.Buffer {
-	var buf bytes.Buffer
-	// send options
+	var buf bytes.Buffer // 这里也可以是conn
+	// encode and write options too buf
 	_ = json.NewEncoder(&buf).Encode(o)
 	fmt.Println(buf.Bytes())
 	fmt.Println(buf.Len())

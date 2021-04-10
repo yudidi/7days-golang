@@ -43,8 +43,8 @@ func (server *Server) ServeConn(conn io.ReadWriteCloser) {
 	// 直接读取
 	buf := make([]byte, 128)
 	n, err := conn.Read(buf)
-	fmt.Println("服务端读取客户端发送来的原始字节流1:", n, err)
-	fmt.Println("服务端读取客户端发送来的原始字节流2:", buf, string(buf))
+	fmt.Println("服务端接收的原始字节流1:", n, err)
+	fmt.Println("服务端接收的原始字节流2:", buf, string(buf))
 	// 读取前面的固定JSON编码。字节[10]之前的部分.
 	var opt Option
 	//| Option{MagicNumber: xxx, CodecType: xxx} | Header{ServiceMethod ...} | Body interface{} |
