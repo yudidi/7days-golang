@@ -16,38 +16,22 @@ const (
 
 const MagicNumber = 0x3bef5c
 
-type Option struct {
+type Data struct {
 	MagicNumber int
 	CodecType   Type
 }
 
-var DefaultOption = &Option{
-	MagicNumber: MagicNumber,
-	CodecType:   GobType,
-}
-
-// 目的: 验证option和header的分隔符
-// 结论: [10]换行符分隔,json.Decode一直读取到[10]的位置。
+// 目的: json.NewEncoder,编码器的输出模块可以是conn, 也可以是buffer.
+// 结论:
 func main() {
-	//编码(&Option{
-	//	MagicNumber: MagicNumber,
-	//	CodecType:   "\n",
-	//})
-	buf1 := 编码(&Option{
+	buf1 := 编码(Data{
 		MagicNumber: MagicNumber,
 		CodecType:   GobType,
 	})
 	解码(buf1)
-	buf2 := 编码(&Option{
-		MagicNumber: MagicNumber,
-		CodecType:   JsonType,
-	})
-	解码(buf2)
-
-	解码(&bytes.Buffer{})
 }
 
-func 编码(o *Option) *bytes.Buffer {
+func 编码(o Data) *bytes.Buffer {
 	var buf bytes.Buffer // 这里也可以是conn
 	// encode and write options too buf
 	_ = json.NewEncoder(&buf).Encode(o)
@@ -58,7 +42,7 @@ func 编码(o *Option) *bytes.Buffer {
 }
 
 func 解码(buf *bytes.Buffer) {
-	var opt Option
+	var opt Data
 	if err := json.NewDecoder(buf).Decode(&opt); err != nil {
 		log.Println("decode options error: ", err)
 		return
