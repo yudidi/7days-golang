@@ -7,7 +7,6 @@ package geerpc
 import (
 	"encoding/json"
 	"fmt"
-	"geerpc/codec"
 	"io"
 	"log"
 	"net"
@@ -16,13 +15,19 @@ import (
 const MagicNumber = 0x3bef5c
 
 type Option struct {
-	MagicNumber int        // MagicNumber marks this's a geerpc request
-	CodecType   codec.Type // client may choose different Codec to encode body
+	MagicNumber int  // MagicNumber marks this's a geerpc request
+	CodecType   Type // client may choose different Codec to encode body
 }
+
+type Type string
+
+const (
+	GobType Type = "application/gob"
+)
 
 var DefaultOption = &Option{
 	MagicNumber: MagicNumber,
-	CodecType:   codec.GobType,
+	CodecType:   GobType, //codec.GobType,
 }
 
 // Server represents an RPC Server.
