@@ -27,12 +27,12 @@ type Header struct {
 type Codec interface {
 	// 接口嵌入. Codec定义Closer的接口方法 // TODO Q:为什么需要定义Closer方法? http://c.biancheng.net/view/82.html
 	io.Closer
-	// 读取客户端或服务端 消息体的header
+	// 读取 客户端 或 服务端 消息的header
 	ReadHeader(*Header) error
-	// 读取客户端请求的args 或 服务端响应的reply, 统称body
+	// 读取 客户端请求的args body 或 服务端响应的reply body, 统称body
 	ReadBody(interface{}) error
 	// 往header写入内容
-	// 把header和body写入网络连接
+	// 把客户端或服务端的请求的header和body写入网络连接
 	Write(*Header, interface{}) error
 }
 

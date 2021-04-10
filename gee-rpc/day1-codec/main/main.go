@@ -38,7 +38,7 @@ func main() {
 	//n, err := conn.Read(buf)
 	//fmt.Println("read result", n, err)
 	//fmt.Println("写入了 ", string(buf))
-	cc := codec.NewGobCodec(conn)
+	client_cc := codec.NewGobCodec(conn)
 	// 模拟客户端
 	// send request & receive response
 	for i := 0; i < 5; i++ {
@@ -47,11 +47,11 @@ func main() {
 			Seq:           uint64(i),
 		}
 		// 模拟客户端端发送数据
-		_ = cc.Write(h, fmt.Sprintf("geerpc req %d", h.Seq))
+		_ = client_cc.Write(h, fmt.Sprintf("geerpc req %d", h.Seq))
 		// 模拟客户端接收数据 // 读取响应头
-		_ = cc.ReadHeader(h)
+		_ = client_cc.ReadHeader(h)
 		var reply string
-		_ = cc.ReadBody(&reply)
+		_ = client_cc.ReadBody(&reply)
 		log.Println("响应：", "h:", h, "reply:", reply)
 	}
 }

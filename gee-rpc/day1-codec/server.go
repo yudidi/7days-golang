@@ -58,13 +58,13 @@ func (server *Server) ServeConn(conn io.ReadWriteCloser) {
 		return
 	}
 	// 根据请求头获取客户端的编码方式,进而使用对应的编码解码器
-	f := codec.NewCodecFuncMap[opt.CodecType] // f:编码解码器的构造函数.
-	if f == nil {
+	newCodecFunc := codec.NewCodecFuncMap[opt.CodecType] // 返回 编码解码器的构造函数.
+	if newCodecFunc == nil {
 		log.Printf("rpc server: invalid codec type %s", opt.CodecType)
 		return
 	}
 	// TODO 服务端选择了消息解码器之后会阻塞等待客户端发送具体的消息内容
-	对应的编码解码器 := f(conn)
+	对应的编码解码器 := newCodecFunc(conn)
 	server.serveCodec(对应的编码解码器)
 }
 

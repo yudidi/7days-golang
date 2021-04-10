@@ -19,14 +19,17 @@ type GobCodec struct {
 
 var _ Codec = (*GobCodec)(nil)
 
-// 传入1个套接字连接
+// 传入1个套接字连接, 返回基于这个conn进行数据传输且使用gob序列化协议的 编码和解码器.
 func NewGobCodec(conn io.ReadWriteCloser) Codec {
-	buf := bufio.NewWriter(conn) // 默认:4096
+	// 默认:4096 // 这里只有Write方法是走缓存的 // TODO 可以了解bufio.Write方法的逻辑 //因为一般写入的内容不会超过buf,所以需要主动flush.
+	buf := bufio.NewWriter(conn)
 	return &GobCodec{
 		conn: conn,
 		buf:  buf,
-		dec:  gob.NewDecoder(conn),
-		enc:  gob.NewEncoder(buf),
+		// 对结构体进行编码,经过缓存区后,输出到buf中 // TODO 结构体->序列化->buf()->buf内部的conn->网线 // c or s发送时走缓存,减少socket系统调用.
+		enc: gob.NewEncoder(buf),
+		// 从conn读取字节流,然后解码为结构体 // TODO ->网线->字节流->反射->结构体
+		dec: gob.NewDecoder(conn),
 	}
 }
 
@@ -38,9 +41,9 @@ func (c *GobCodec) ReadBody(body interface{}) error {
 	return c.dec.Decode(body)
 }
 
+// 因为是带缓冲的写,所以每次都需要flush buf to 底层的conn
 func (c *GobCodec) Write(h *Header, body interface{}) (err error) {
 	defer func() {
-		// TODO 这个时候才从缓存区写入到底层Write(conn中). header和body一起发送下去
 		_ = c.buf.Flush()
 		if err != nil {
 			_ = c.Close()
