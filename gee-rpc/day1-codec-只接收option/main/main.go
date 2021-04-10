@@ -30,5 +30,5 @@ func main() {
 	defer func() { _ = conn.Close() }()
 	// send options
 	_ = json.NewEncoder(conn).Encode(geerpc.DefaultOption) // TODO 这句话执行后就已经写入给conn了吗? 试试服务端是否可以读取到数据
-	time.Sleep(time.Second)
+	time.Sleep(2 * time.Second)
 }

@@ -10,6 +10,7 @@ import (
 	"geerpc/codec"
 	"io"
 	"log"
+	"net"
 )
 
 const MagicNumber = 0x3bef5c
@@ -40,20 +41,38 @@ var DefaultServer = NewServer()
 func (server *Server) ServeConn(conn io.ReadWriteCloser) {
 	defer func() { _ = conn.Close() }()
 	// 直接读取
-	//buf := make([]byte,128)
-	//n,err := conn.Read(buf)
-	//fmt.Println("server read before",n,err,buf,string(buf))
-	// 读取前面的固定JSON编码
+	buf := make([]byte, 128)
+	n, err := conn.Read(buf)
+	fmt.Println("服务端读取客户端发送来的原始字节流1:", n, err)
+	fmt.Println("服务端读取客户端发送来的原始字节流2:", buf, string(buf))
+	// 读取前面的固定JSON编码。字节[10]之前的部分.
 	var opt Option
 	//| Option{MagicNumber: xxx, CodecType: xxx} | Header{ServiceMethod ...} | Body interface{} |
 	//| <------      固定 JSON 编码      ------>  10 <-------   编码方式由 CodeType 决定   ------->|
 	if err := json.NewDecoder(conn).Decode(&opt); err != nil {
-		log.Println("rpc server: options error: ", err)
+		fmt.Println("rpc server: options error: ", err)
 		return
 	}
 	fmt.Println("get opt", opt)
 
-	buf := make([]byte, 128)
-	n, err := conn.Read(buf)
+	//buf := make([]byte, 128)
+	//n, err := conn.Read(buf)
 	fmt.Println("server read after", n, err, buf, string(buf))
 }
+
+// Accept accepts connections on the listener and serves requests
+// for each incoming connection.
+func (server *Server) Accept(lis net.Listener) {
+	for {
+		conn, err := lis.Accept()
+		if err != nil {
+			log.Println("rpc server: accept error:", err)
+			return
+		}
+		go server.ServeConn(conn)
+	}
+}
+
+// Accept accepts connections on the listener and serves requests
+// for each incoming connection.
+func Accept(lis net.Listener) { DefaultServer.Accept(lis) }
