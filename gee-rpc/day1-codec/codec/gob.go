@@ -49,7 +49,8 @@ func (c *GobCodec) Write(h *Header, body interface{}) (err error) {
 			_ = c.Close()
 		}
 	}()
-	if err = c.enc.Encode(h); err != nil { //
+	// 把header和body两个结构体序列化之后,统一写入到buf中 // TODO 考虑body过大，超过缓存区大小的情况，会导致部分body先发送另一端。
+	if err = c.enc.Encode(h); err != nil {
 		log.Println("rpc: gob error encoding header:", err)
 		return
 	}
