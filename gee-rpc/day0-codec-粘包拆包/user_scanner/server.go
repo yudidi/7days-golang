@@ -31,10 +31,11 @@ func packetSlitFunc(data []byte, atEOF bool) (advance int, token []byte, err err
 		var l int16
 		// 读出 数据包中 实际数据 的长度(大小为 0 ~ 2^16)
 		binary.Read(bytes.NewReader(data[4:6]), binary.BigEndian, &l)
-		pl := int(l) + 6
-		if pl <= len(data) {
+		pl := int(l) + 6     // pl是头部的数据长度,当实际发送的数据data的长度>=pl时，才说明所有数据发送完了，才能正常读取。
+		if pl <= len(data) { //
 			return pl, data[:pl], nil
 		}
+		// TODO 否则,说明pl个字节，还没有全部到，读取失败，pl以上个数据到达后，才能成功读取.
 	}
 	return
 }
@@ -51,7 +52,7 @@ func handleConn2(conn net.Conn) {
 		result.Write(buf[0:n])
 		fmt.Println(string(buf[0:]), n, err)
 		if err != nil {
-			if err == io.EOF {
+			if err == io.EOF { // 没有更多可读的了.
 				continue
 			} else {
 				fmt.Println("read err:", err)
