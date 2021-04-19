@@ -18,6 +18,7 @@ import (
 type Engine struct{}
 
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	fmt.Printf("req %+v \n", *req)
 	switch req.URL.Path {
 	case "/":
 		fmt.Fprintf(w, "URL.Path = %q\n", req.URL.Path)

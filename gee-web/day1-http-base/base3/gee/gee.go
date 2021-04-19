@@ -7,7 +7,7 @@ import (
 )
 
 // HandlerFunc defines the request handler used by gee
-type HandlerFunc func(http.ResponseWriter, *http.Request)
+type HandlerFunc func(http.ResponseWriter, *http.Request) // TODO 定义请求的处理方法的基本结构。有点类似ServeHTTP方法 // 可以是自身框架的一个结构，下一步调整就是这里
 
 // Engine implement the interface of ServeHTTP
 type Engine struct {
@@ -37,7 +37,7 @@ func (engine *Engine) POST(pattern string, handler HandlerFunc) {
 
 // Run defines the method to start a http server
 func (engine *Engine) Run(addr string) (err error) {
-	return http.ListenAndServe(addr, engine)
+	return http.ListenAndServe(addr, engine) // engine实现了ServeHTTP接口
 }
 
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {

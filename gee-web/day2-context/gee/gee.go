@@ -6,7 +6,7 @@ import (
 )
 
 // HandlerFunc defines the request handler used by gee
-type HandlerFunc func(*Context)
+type HandlerFunc func(*Context) // TODO 定义gee框架自身使用的处理方法模型,和ServeHTTP区分开来
 
 // Engine implement the interface of ServeHTTP
 type Engine struct {
