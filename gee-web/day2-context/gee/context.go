@@ -46,14 +46,17 @@ func (c *Context) SetHeader(key string, value string) {
 }
 
 func (c *Context) String(code int, format string, values ...interface{}) {
-	c.SetHeader("Content-Type", "text/plain")
+	//c.SetHeader("Content-Type", "text/plain")
+	// 还原错误的情况
 	c.Status(code)
+	c.SetHeader("Content-Type", "text/plain")
 	c.Writer.Write([]byte(fmt.Sprintf(format, values...)))
 }
 
 func (c *Context) JSON(code int, obj interface{}) {
+	//c.SetHeader("Content-Type", "application/json")
+	c.Status(code) // 可以从git commit中看到这两个方法的顺序不能放反了.
 	c.SetHeader("Content-Type", "application/json")
-	c.Status(code)
 	// Q:为什么编码器需要指定输出模块，因为结构体已经在Go内存中,可以直接读取,不需要输入,只需要编码,借助自定义输出模块完成自定义到输出动作(如.输出到指定位置http.resp)
 	encoder := json.NewEncoder(c.Writer)
 	if err := encoder.Encode(obj); err != nil {
@@ -61,6 +64,15 @@ func (c *Context) JSON(code int, obj interface{}) {
 		//  Changing the header map after a call to WriteHeader (or Write) has no effect unless the modified headers are trailers.
 		// 但是这里理论上永远也走不到? 因为json.encode不会出错?
 		// TODO gin是直接panic
+		http.Error(c.Writer, err.Error(), 500)
+	}
+}
+
+func (c *Context) JSONRight(code int, obj interface{}) {
+	c.SetHeader("Content-Type", "application/json")
+	c.Status(code)
+	encoder := json.NewEncoder(c.Writer)
+	if err := encoder.Encode(obj); err != nil {
 		http.Error(c.Writer, err.Error(), 500)
 	}
 }
