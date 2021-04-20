@@ -54,8 +54,13 @@ func (c *Context) String(code int, format string, values ...interface{}) {
 func (c *Context) JSON(code int, obj interface{}) {
 	c.SetHeader("Content-Type", "application/json")
 	c.Status(code)
+	// Q:为什么编码器需要指定输出模块，因为结构体已经在Go内存中,可以直接读取,不需要输入,只需要编码,借助自定义输出模块完成自定义到输出动作(如.输出到指定位置http.resp)
 	encoder := json.NewEncoder(c.Writer)
 	if err := encoder.Encode(obj); err != nil {
+		// TODO Q:这里会是无效的，参考 @xiaoxfan评论
+		//  Changing the header map after a call to WriteHeader (or Write) has no effect unless the modified headers are trailers.
+		// 但是这里理论上永远也走不到? 因为json.encode不会出错?
+		// TODO gin是直接panic
 		http.Error(c.Writer, err.Error(), 500)
 	}
 }

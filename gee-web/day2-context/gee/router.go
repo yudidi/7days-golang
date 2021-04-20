@@ -17,6 +17,7 @@ func (r *router) addRoute(method string, pattern string, handler HandlerFunc) {
 	r.handlers[key] = handler
 }
 
+// ydd: route to target handler
 func (r *router) handle(c *Context) {
 	key := c.Method + "-" + c.Path
 	if handler, ok := r.handlers[key]; ok {
