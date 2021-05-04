@@ -16,13 +16,15 @@ func (n *node) String() string {
 	return fmt.Sprintf("node{pattern=%s, part=%s, isWild=%t}", n.pattern, n.part, n.isWild)
 }
 
+// 插入以n作为根节点的trie树.
 func (n *node) insert(pattern string, parts []string, height int) {
+	fmt.Printf("insert pattern:%+v，parts:%+v,height:%+v \n", pattern, parts, height)
 	if len(parts) == height {
 		n.pattern = pattern
 		return
 	}
 
-	part := parts[height]
+	part := parts[height] // 获取当前字母
 	child := n.matchChild(part)
 	if child == nil {
 		child = &node{part: part, isWild: part[0] == ':' || part[0] == '*'}
@@ -61,9 +63,10 @@ func (n *node) travel(list *([]*node)) {
 	}
 }
 
+// 判断某个字母是否匹配
 func (n *node) matchChild(part string) *node {
 	for _, child := range n.children {
-		if child.part == part || child.isWild {
+		if child.part == part || child.isWild { // TODO 精确匹配 or 是模糊匹配
 			return child
 		}
 	}

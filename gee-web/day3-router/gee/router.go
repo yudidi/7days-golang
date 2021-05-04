@@ -1,6 +1,7 @@
 package gee
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -20,7 +21,7 @@ func newRouter() *router {
 // Only one * is allowed
 func parsePattern(pattern string) []string {
 	vs := strings.Split(pattern, "/")
-
+	fmt.Println(">> parsePattern", vs)
 	parts := make([]string, 0)
 	for _, item := range vs {
 		if item != "" {
