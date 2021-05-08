@@ -31,7 +31,7 @@ func main() {
 	defer func() { _ = conn.Close() }()
 	//time.Sleep(time.Second)
 	// send options
-	_ = json.NewEncoder(conn).Encode(geerpc.DefaultOption) // TODO 这句话往conn里面写入东西,执行后就已经写入给conn了吗?
+	_ = json.NewEncoder(conn).Encode(geerpc.DefaultOption) // TODO Q:这里往conn写入东西,执行后就已经写入给conn了吗? A:写入了
 	fmt.Printf("%+v\n", geerpc.DefaultOption)
 	//buf := make([]byte, 1024)
 	//fmt.Printf("conn %+v \n", conn)
