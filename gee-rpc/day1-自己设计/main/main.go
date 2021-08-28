@@ -30,7 +30,7 @@ func main() {
 		}
 		coder := Coder{conn: conn}
 		//coder.Write(&Data{ii: 1})
-		fmt.Println("coder read ", coder.Read())
+		fmt.Printf("coder read 读取到gob解码的结构体: %+v \n", coder.Read())
 	}
 }
 
@@ -46,10 +46,10 @@ func (coder *Coder) Read() interface{} {
 	return coder.decode(data)
 }
 
-func (coder *Coder) Write(goData interface{}) {
-	sendData := coder.encode(goData)
-	connWrite(coder.conn, sendData)
-}
+//func (coder *Coder) Write(goData interface{}) {
+//	sendData := coder.encode(goData)
+//	connWrite(coder.conn, sendData)
+//}
 
 func (c *Coder) encode(sendData interface{}) []byte {
 	// TODO
@@ -73,7 +73,7 @@ func (c *Coder) decode(data []byte) Data {
 	d := Data{}
 	err := dec.Decode(&d) //传递参数必须为 地址
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("gob.Decode err:", err)
 	}
 	return d
 }
@@ -86,7 +86,7 @@ func connRead(conn net.Conn) []byte {
 	return buf
 }
 
-// 真正写入数据
-func connWrite(conn net.Conn, sendData []byte) (n int, err error) {
-	return conn.Write(sendData)
-}
+//// 真正写入数据
+//func connWrite(conn net.Conn, sendData []byte) (n int, err error) {
+//	return conn.Write(sendData)
+//}
